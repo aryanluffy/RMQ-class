@@ -1,0 +1,86 @@
+//Provides index of min and max for a given range(in case of multiple indices returns the leftmost one) 
+bool is_intersection(int l,int r,int ll,int rr)
+{
+    if(r<ll || rr<l)
+       return 0;
+    return 1;
+}
+struct node
+{
+	int mn,mx,l,r;
+};
+class RMQ
+{
+public:
+	v32 h;
+	vt <node> st;
+	RMQ(v32 a)
+	{
+       h=a;
+       st.resize(4*h.size());
+       build(0,h.size()-1);
+	}
+	void build(int l,int r,int k=0)
+	{
+		st[k].l=l,st[k].r=r;
+	    if(l==r)
+		   {st[k].mx=st[k].mn=l;
+             return;
+		   }
+	    build(l,(l+r)/2,2*k+1);
+	    build((l+r)/2+1,r,2*k+2);
+	    if(h[st[2*k+1].mn]<=h[st[2*k+2].mn])
+	    st[k].mn=st[2*k+1].mn;
+	    else st[k].mn=st[2*k+2].mn;	
+        if(h[st[2*k+1].mx]>=h[st[2*k+2].mx])
+	    st[k].mx=st[2*k+1].mx;
+	    else st[k].mx=st[2*k+2].mx;
+	}
+    int minquery(int l,int r,int k=0)
+    {
+        if(l>r)return MAXN;
+        int ll=st[k].l,rr=st[k].r,mid=(ll+rr)/2;
+        if(ll>=l && rr<=r)
+         return st[k].mn;
+   	    int ans=l;   
+   	    if(is_intersection(ll,mid,l,r)==1)
+   	       ans=minquery(l,r,2*k+1);
+   	    if(is_intersection(mid+1,rr,l,r)==1)
+   	     {if(h[ans]>h[minquery(l,r,2*k+2)])	
+   	       ans=minquery(l,r,2*k+2);}
+   	    return ans;     
+    }
+	int maxquery(int l,int r,int k=0)
+    {
+       if(l>r)return -MAXN;
+       int ll=st[k].l,rr=st[k].r,mid=(ll+rr)/2;
+       if(ll>=l && rr<=r)
+          return st[k].mx;
+   	   int ans=l;   
+   	   if(is_intersection(ll,mid,l,r)==1)
+   	      ans=maxquery(l,r,2*k+1);
+   	   if(is_intersection(1+mid,rr,l,r)==1)
+   	      {if(h[ans]<h[maxquery(l,r,2*k+2)])	
+   	          ans=maxquery(l,r,2*k+2);}
+   	   return ans;     
+    }
+    void update(int id,int val,int k=0)
+    {
+        int l=st[k].l,r=st[k].r,mid=(l+r)/2;
+        if(l==r)
+        {
+            h[l]=val;
+            return;
+        }
+        if(is_intersection(l,mid,id,id)==1)
+        update(id,val,2*k+1);
+        if(is_intersection(mid+1,r,id,id)==1)
+        update(id,val,2*k+2);
+        if(h[st[2*k+1].mn]<=h[st[2*k+2].mn])
+	    st[k].mn=st[2*k+1].mn;
+	    else st[k].mn=st[2*k+2].mn;	
+        if(h[st[2*k+1].mx]>=h[st[2*k+2].mx])
+	    st[k].mx=st[2*k+1].mx;
+	    else st[k].mx=st[2*k+2].mx;
+    }
+};
